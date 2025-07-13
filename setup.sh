@@ -75,16 +75,28 @@ if ! grep -Fxq "$MISE_RC_LINE" ~/.zshrc; then
   echo "$MISE_RC_LINE" >> ~/.zshrc
 fi
 
-# TODO: Replace with docker installation from https://docs.docker.com/
 echo -e "${GREEN}6. Installing Docker & Docker Compose...${NC}"
-sudo dnf install -y docker
+
+# Uninstall old docker versions
+sudo dnf remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-selinux \
+                  docker-engine-selinux \
+                  docker-engine
+# Install Docker
+sudo dnf -y install dnf-plugins-core
+sudo dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Enable and start Docker
 sudo systemctl enable --now docker
 
-# Docker Compose v2 (recommended way now)
-if ! command -v docker-compose &> /dev/null; then
-  sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
-fi
+
 
 echo -e "${GREEN}7. Installing VSCode...${NC}"
 if ! rpm -q code &> /dev/null; then
