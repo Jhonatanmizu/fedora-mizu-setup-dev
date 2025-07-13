@@ -67,11 +67,11 @@ The script automatically calls another shell script to manage your dotfiles usin
 
 ```bash
 fedora-mizu-setup-dev/
-├── dotfiles/           # Your dotfiles organized by app (bash, nvim, git, etc.)
-├── scripts/            # Helper scripts split by purpose (e.g., flatpak, tools)
-├── setup.sh            # Main entrypoint shell script
-├── stow-dotfiles.sh    # Handles dotfile setup via GNU stow
-└── README.md           # This file
+├── dotfiles/
+├── scripts/
+├── setup.sh
+├── stow-dotfiles.sh
+└── README.md
 ```
 
 ## 🧠 Requirements
