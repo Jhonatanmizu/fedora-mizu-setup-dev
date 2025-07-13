@@ -105,11 +105,10 @@ if ! rpm -q code &> /dev/null; then
   sudo dnf install -y code
 fi
 
-# TODO: use jetbrains-toolbox for all jetbrains tools
 echo -e "${GREEN}8. Installing Android Studio...${NC}"
-sudo dnf install -y java-11-openjdk-devel
 if [ ! -d "/opt/android-studio" ]; then
-  wget https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2022.3.1.20/android-studio-2022.3.1.20-linux.tar.gz
+  LATEST_URL=$(curl -s "https://developer.android.com/studio#downloads" | grep -o 'https://redirector.gvt1.com/edgedl/android/studio/ide-zips/[^"]*-linux.tar.gz' | head -n 1)
+  wget "$LATEST_URL"
   sudo tar -xzf android-studio-*.tar.gz -C /opt
   rm android-studio-*.tar.gz
 fi
@@ -117,10 +116,6 @@ ANDROID_PATH='export PATH=$PATH:/opt/android-studio/bin'
 if ! grep -Fxq "$ANDROID_PATH" ~/.zshrc; then
   echo "$ANDROID_PATH" >> ~/.zshrc
 fi
-
-echo -e "${GREEN}9. Installing IntelliJ IDEA Community Edition...${NC}"
-sudo dnf copr enable -y phracek/PyCharm
-sudo dnf install -y intellij-idea-community
 
 echo -e "${GREEN}10. Installing Alacritty Terminal...${NC}"
 sudo dnf copr enable -y atim/alacritty
