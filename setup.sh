@@ -123,7 +123,7 @@ mkdir -p ~/Wallpapers
 echo -e "${GREEN}12. Loading dotfiles...${NC}"
 # Ensure GNU Stow is installed
 sudo dnf install -y stow
-bash "$(dirname "$0")/load-dotfiles.sh"
+bash "$(dirname "$0")/stow-dotfiles.sh"
 
 
 
