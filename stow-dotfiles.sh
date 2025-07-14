@@ -1,28 +1,49 @@
 #!/bin/bash
 
-set -e
-echo "📦 Loading dotfiles with GNU Stow..."
+set -euo pipefail
 
-# Set dotfiles directory
+# === Colors ===
+GREEN="\033[1;32m"
+YELLOW="\033[1;33m"
+RED="\033[1;31m"
+CYAN="\033[1;36m"
+NC="\033[0m"
+
+echo -e "${CYAN}📦 Loading dotfiles with GNU Stow...${NC}"
+
+# === Prerequisite Check ===
+REQUIRED_CMDS=(git stow)
+for cmd in "${REQUIRED_CMDS[@]}"; do
+  if ! command -v "$cmd" &>/dev/null; then
+    echo -e "${RED}✖ Required command '$cmd' not found. Please install it first.${NC}"
+    exit 1
+  fi
+done
+
+# === Set dotfiles directory ===
 DOTFILES_DIR="$HOME/.dotfiles"
-# Clone your dotfiles repository if it's not already present
+
+# === Clone if not exists ===
 if [ ! -d "$DOTFILES_DIR" ]; then
-  echo "🔄 Cloning dotfiles repository..."
+  echo -e "${YELLOW}🔄 Cloning dotfiles repository...${NC}"
   git clone https://github.com/jhonatanmizu/dotfiles.git "$DOTFILES_DIR"
 fi
 
-cd "$DOTFILES_DIR"
+cd "$DOTFILES_DIR" || {
+  echo -e "${RED}✖ Failed to access $DOTFILES_DIR${NC}"
+  exit 1
+}
 
-# List of dotfile folders to stow (adjust to your structure)
+# === List of stow modules ===
 MODULES=("zsh" "git" "nvim" "alacritty" "mise" "starship" "ulauncher")
 
 for module in "${MODULES[@]}"; do
   if [ -d "$module" ]; then
-    echo "🔗 Stowing $module"
+    echo -e "${GREEN}🔗 Stowing module: $module${NC}"
     stow "$module"
   else
-    echo "⚠️  Module '$module' not found in $DOTFILES_DIR"
+    echo -e "${YELLOW}⚠️  Module '$module' not found in $DOTFILES_DIR${NC}"
   fi
 done
 
-echo "✅ Dotfiles successfully stowed!"
+echo -e "${GREEN}✅ Dotfiles successfully stowed!${NC}"
