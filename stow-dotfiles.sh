@@ -9,7 +9,7 @@ DOTFILES_DIR="$HOME/.dotfiles"
 # Clone your dotfiles repository if it's not already present
 if [ ! -d "$DOTFILES_DIR" ]; then
   echo "🔄 Cloning dotfiles repository..."
-  git clone https://github.com/YOUR_USERNAME/YOUR_DOTFILES_REPO.git "$DOTFILES_DIR"
+  git clone https://github.com/jhonatanmizu/dotfiles.git "$DOTFILES_DIR"
 fi
 
 cd "$DOTFILES_DIR"
