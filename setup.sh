@@ -56,7 +56,6 @@ flatpak install -y flathub \
     com.dropbox.Client \
     com.vivaldi.Vivaldi
 
-# TODO: Clone wallpaper repo
 
 echo -e "${GREEN}3. Installing Development Tools...${NC}"
 sudo dnf groupinstall -y "Development Tools" "Development Libraries"
