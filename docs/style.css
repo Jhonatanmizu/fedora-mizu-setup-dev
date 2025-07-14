@@ -1,0 +1,79 @@
+:root {
+  --bg: #1a1b26;
+  --bg-alt: #24283b;
+  --fg: #c0caf5;
+  --blue: #7aa2f7;
+  --purple: #9d7cd8;
+  --green: #9ece6a;
+  --cyan: #7dcfff;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Fira Code", monospace;
+  background-color: var(--bg);
+  color: var(--fg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+  line-height: 1.6;
+}
+
+h1 {
+  font-size: 2.5rem;
+  color: var(--blue);
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  color: var(--purple);
+}
+
+a {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.container {
+  max-width: 700px;
+  width: 100%;
+  padding: 2rem;
+  background: var(--bg-alt);
+  border-radius: 12px;
+  box-shadow: 0 0 10px #00000044;
+}
+
+code {
+  background: #292e42;
+  padding: 0.2rem 0.4rem;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  color: var(--green);
+}
+
+.button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--blue);
+  color: var(--bg);
+  border-radius: 8px;
+  margin-top: 1.5rem;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.button:hover {
+  background: var(--cyan);
+}
+
+footer {
+  margin-top: 4rem;
+  font-size: 0.9rem;
+  color: #565f89;
+}
