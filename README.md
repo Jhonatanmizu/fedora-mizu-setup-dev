@@ -1,45 +1,61 @@
 # 🐧 Fedora Mizu Dev Setup
 
-A simple and opinionated shell script to quickly set up a Fedora-based development environment. Designed to automate the installation of essential tools, configure dotfiles using `stow`, and provide a clean, consistent developer experience across machines.
+A simple, fast, and opinionated shell script to quickly set up a Fedora-based development environment. It automates the installation of essential tools, configures dotfiles using `stow`, and provides a clean, consistent developer experience across machines.
 
 ---
 
 ## 🎯 Purpose
 
-This project was created to streamline the process of setting up my personal development environment on Fedora. It automates the installation of commonly used applications, tools, and configurations, ensuring a consistent and productive setup every time.
+This project was created to streamline the setup of my personal development environment on Fedora. It automates the installation of my most-used applications, CLI tools, and desktop customizations — ensuring a consistent, reliable, and ready-to-code system in minutes.
 
 ---
 
 ## ⚙️ Features
 
-- 📦 Install essential packages and developer tools
-- 🧰 Setup Flatpak with recommended remotes
-- 🚫 Avoids `snap` (Snapcraft) usage entirely
-- 🖥️ Configure GNOME with tweaks and extensions
-- 🗂️ Apply dotfiles using GNU `stow`
-- ✨ Minimal and modular – split into manageable scripts
+- 📦 Install essential packages and development tools
+- 🧰 Set up Flatpak and configure the Flathub remote
+- 🛠️ Apply dotfiles using GNU `stow` (modular config management)
+- 🖥️ Configure GNOME with preferred tweaks, extensions, and keybindings
+- 🧼 Clean, minimal, and fully modular – each setup task is in its own script
+- 🚫 No Snap (Snapcraft) dependencies – everything is `dnf`/`flatpak` based
 
 ---
 
-## 📋 Tools Installed
+## 📋 Tools & Apps Installed
 
-The script installs the following (among others):
+### 🧩 Development Tools
 
-### 📚 Utilities & Essentials
+- `git`, `curl`, `wget`, `gcc-c++`, `make`
+- `neovim` – Advanced text editor
+- `bat`, `fastfetch`, `bashtop` – CLI utilities
+- `Docker` & `Docker Compose`
+- `VSCode` & `Android Studio`
+- `mise` – Version manager
+- `starship` – Prompt customizer
+
+### 🖼️ GNOME Tweaks & Extensions
+
+- `gnome-tweaks`, `gnome-extensions-app`
+- Extensions like Dash to Dock, Blur My Shell, Just Perfection, and more
+- Custom GNOME keyboard shortcuts
+- Themes: Layan (GTK) + Tela (icons)
+
+### 📁 Utilities & GUI Tools
 
 - `xournal` – PDF annotation
 - `localsend` – Local file sharing
-- `gnome-tweaks` – Customize GNOME desktop
-- `gnome-extensions-app` – Manage GNOME shell extensions
+- `gimp`, `krita`, `inkscape`, `kdenlive`, `vlc`
+- Flatpak apps: Obsidian, Spotify, Dropbox, Vivaldi
 
-### 📦 Package Managers
+---
 
-- `dnf` – Fedora's native package manager
-- `flatpak` – Universal app store (with Flathub remote)
+## 🧩 Dotfiles
 
-### 🧩 Dotfiles
+Dotfiles are managed using [GNU Stow](https://www.gnu.org/software/stow/) for clean and modular configuration. Current modules include:
 
-- Managed using [GNU stow](https://www.gnu.org/software/stow/) for clean and modular configuration
+- `zsh`, `git`, `nvim`, `alacritty`, `mise`, `starship`, `ulauncher`
+
+You can easily add or remove modules from your dotfiles repo.
 
 ---
 
@@ -52,44 +68,46 @@ git clone https://github.com/Jhonatanmizu/fedora-mizu-setup-dev.git
 cd fedora-mizu-setup-dev
 ```
 
-### 2. Run the setup script
+### 2. Run the main setup script
 
 ```bash
 chmod +x setup.sh
 ./setup.sh
 ```
 
-### 3. Customize your dotfiles
-
-The script automatically calls another shell script to manage your dotfiles using stow. You can modify the contents in the dotfiles/ directory to suit your needs.
+☑️ This will install packages, set up GNOME, apply themes, load dotfiles, and more.
 
 ## 🗃️ Repository Structure
 
 ```bash
 fedora-mizu-setup-dev/
-├── dotfiles/
-├── scripts/
-├── setup.sh
-├── stow-dotfiles.sh
+├── dotfiles/             # Dotfiles to be stowed
+├── scripts/              # Sub-scripts for fonts, themes, GNOME setup
+├── setup.sh              # Main setup entry point
+├── stow-dotfiles.sh      # Dotfile manager using GNU Stow
 └── README.md
 ```
 
 ## 🧠 Requirements
 
-- Fedora (tested on Fedora Workstation)
-- sudo privileges
-- Internet connection
+- ✅ Fedora Linux (tested on Fedora Workstation)
+
+- ✅ Internet connection
+
+- ✅ sudo privileges
+
+- ✅ GNOME desktop environment (for GNOME-specific tweaks)
 
 ## 📝 Notes
 
-Flatpak is preferred over Snap for app installation
-The script assumes GNOME is the default desktop environment
-Some GNOME extensions may need manual approval via the Extensions app
+- Flatpak is preferred over Snap. This setup avoids using Snap entirely.
+- GNOME is assumed as the desktop environment.
+- Some GNOME extensions may require manual enabling via the Extensions app.
 
 ## 🤝 Contributing
 
-Feel free to fork the project or open an issue if you want to suggest improvements or report problems.
+Found a bug or want to suggest improvements? Feel free to fork the project, open an issue, or submit a pull request.
 
-## 🐛 License
+## 📄 License
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
