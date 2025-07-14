@@ -23,7 +23,7 @@ sudo dnf install -y \
   zsh-syntax-highlighting \
   zsh-autosuggestions \
   neovim \
-  bat
+  bat \  
 
 echo -e "${GREEN}2. Installing Basic Tools...${NC}"
 
@@ -45,7 +45,8 @@ sudo dnf install -y \
     krita \
     inkscape \
     kdenlive \
-    vlc
+    vlc 
+
 
 # Install flatpak packages (GUI apps not available via dnf)
 flatpak install -y flathub \
@@ -55,7 +56,7 @@ flatpak install -y flathub \
     com.dropbox.Client \
     com.vivaldi.Vivaldi
 
-
+# TODO: Clone wallpaper repo
 
 echo -e "${GREEN}3. Installing Development Tools...${NC}"
 sudo dnf groupinstall -y "Development Tools" "Development Libraries"
@@ -68,11 +69,6 @@ fi
 echo -e "${GREEN}5. Installing Mise Version Manager...${NC}"
 if ! command -v mise &> /dev/null; then
   curl https://mise.run | sh
-fi
-
-MISE_RC_LINE='eval "$(~/.local/bin/mise activate zsh)"'
-if ! grep -Fxq "$MISE_RC_LINE" ~/.zshrc; then
-  echo "$MISE_RC_LINE" >> ~/.zshrc
 fi
 
 echo -e "${GREEN}6. Installing Docker & Docker Compose...${NC}"
@@ -96,8 +92,6 @@ sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin dock
 # Enable and start Docker
 sudo systemctl enable --now docker
 
-
-
 echo -e "${GREEN}7. Installing VSCode...${NC}"
 if ! rpm -q code &> /dev/null; then
   sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
@@ -111,10 +105,6 @@ if [ ! -d "/opt/android-studio" ]; then
   wget "$LATEST_URL"
   sudo tar -xzf android-studio-*.tar.gz -C /opt
   rm android-studio-*.tar.gz
-fi
-ANDROID_PATH='export PATH=$PATH:/opt/android-studio/bin'
-if ! grep -Fxq "$ANDROID_PATH" ~/.zshrc; then
-  echo "$ANDROID_PATH" >> ~/.zshrc
 fi
 
 echo -e "${GREEN}10. Installing Alacritty Terminal...${NC}"
@@ -132,6 +122,31 @@ echo -e "${GREEN}12. Loading dotfiles...${NC}"
 sudo dnf install -y stow
 bash "$(dirname "$0")/stow-dotfiles.sh"
 
+# Ulauncher
+echo -e "${GREEN}13. Installing Ulauncher..."
+sudo dnf install -y ulauncher
+mkdir -p ~/.config/autostart
+cp /usr/share/applications/ulauncher.desktop ~/.config/autostart/
 
+# Starship shell prompt
+echo -e "${GREEN}14. Install Starship shell prompt..."
+curl -sS https://starship.rs/install.sh | sh -s -- -y
+
+# Install gnome-extensions
+echo -e "${GREEN}15. Installing GNOME extensions...${NC}"
+bash "$(dirname "$0")/scripts/shell-extensions.sh"
+
+# Gnome shortcuts
+echo -e "${GREEN}16. Setting up GNOME shortcuts...${NC}"
+bash "$(dirname "$0")/scripts/gnome-shortcuts.sh"
+
+# Install themes
+echo -e "${GREEN}17. Installing themes...${NC}"
+bash "$(dirname "$0")/scripts/themes.sh"
+
+
+# Install fonts
+echo -e "${GREEN}18. Installing fonts...${NC}"
+bash "$(dirname "$0")/scripts/fonts.sh"
 
 echo -e "${GREEN}✅ Setup complete! Please restart your terminal or run \`exec zsh\` to apply changes.${NC}"
