@@ -16,136 +16,71 @@ success() { echo -e "${GREEN}✓ $1${NC}"; }
 warning() { echo -e "${YELLOW}⚠ $1${NC}"; }
 error() { echo -e "${RED}✖ $1${NC}" >&2; }
 
-# === Check Requirements ===
-REQUIRED_CMDS=(curl jq gnome-extensions)
-missing_cmds=()
+# === Script Setup ===
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../utils.sh"
 
-for cmd in "${REQUIRED_CMDS[@]}"; do
-  if ! command -v "$cmd" &>/dev/null; then
-    missing_cmds+=("$cmd")
-  fi
-done
+# === Package Installation ===
+info "Installing required packages..."
+install_packages python-pipx gnome-shell-extensions
+success "Packages installed"
 
-if [ ${#missing_cmds[@]} -gt 0 ]; then
-  error "Missing required commands: ${missing_cmds[*]}"
-  info "Install them with:"
-  echo "  sudo dnf install -y ${missing_cmds[*]}"
-  exit 1
+# === gnome-extensions-cli Setup ===
+GEXT_BIN="$HOME/.local/bin/gext"
+
+if ! command -v "$GEXT_BIN" &>/dev/null; then
+  info "gnome-extensions-cli not found, installing via pipx..."
+  pipx install gnome-extensions-cli --system-site-packages
+  success "gnome-extensions-cli installed"
+else
+  info "gnome-extensions-cli already installed"
 fi
 
-# === Main Script ===
-BASE_URL="https://extensions.gnome.org"
-
-# List of extension slugs with friendly names
-declare -A EXTENSIONS=(
-  ["dash-to-dock"]="Dash to Dock"
-  ["just-perfection"]="Just Perfection"
-  ["blur-my-shell"]="Blur My Shell"
-  ["appindicator-support"]="AppIndicator Support"
-  ["caffeine"]="Caffeine"
-  ["clipboard-indicator"]="Clipboard Indicator"
-  ["vitals"]="Vitals"
-  ["gsconnect"]="GSConnect"
-  ["emoji-selector"]="Emoji Selector"
+# === Extensions to Install ===
+declare -a EXTENSIONS=(
+  "tactile@lundal.io"
+  "just-perfection-desktop@just-perfection"
+  "blur-my-shell@aunetx"
+  "space-bar@luchrioh"
+  "undecorate@sun.wxg@gmail.com"
+  "tophat@fflewddur.github.io"
+  "switcher@landau.fi"
 )
 
-# Get GNOME version
-GNOME_VERSION=$(gnome-shell --version | awk '{print $3}')
-info "Detected GNOME Shell version: ${GNOME_VERSION}"
+echo -e "\n${CYAN}=== Installing GNOME Extensions via gext ===${NC}"
 
-# Function to install a single extension
-install_extension() {
-  local SLUG=$1
-  local NAME=${EXTENSIONS[$SLUG]:-$SLUG}
-  info "Processing: ${NAME} (${SLUG})"
-
-  # Query extension metadata
-  local JSON UUID EXTENSION_ID VERSION
-  JSON=$(curl -fsS "${BASE_URL}/extension-query/?search=${SLUG}" || {
-    error "Failed to query extension metadata"
-    return 1
-  })
-
-  UUID=$(echo "$JSON" | jq -r '.extensions[0].uuid')
-  EXTENSION_ID=$(echo "$JSON" | jq -r '.extensions[0].pk')
-
-  if [[ -z "$UUID" || "$UUID" == "null" ]]; then
-    warning "UUID not found for slug: ${SLUG}"
-    return 1
-  fi
-
-  if [[ -z "$EXTENSION_ID" || "$EXTENSION_ID" == "null" ]]; then
-    warning "Extension ID not found for ${SLUG}"
-    return 1
-  fi
-
-  # Find compatible version
-  VERSION=$(curl -fsS "${BASE_URL}/extension-info/?pk=${EXTENSION_ID}" | \
-    jq -r ".shell_version_map[] | select(.shell_version == \"${GNOME_VERSION}\") | .pk" | \
-    head -n 1)
-
-  if [[ -z "$VERSION" || "$VERSION" == "null" ]]; then
-    warning "No compatible version found for GNOME ${GNOME_VERSION} and ${NAME}"
-    return 1
-  fi
-
-  # Download and install
-  local TMP_DIR ZIP_URL
-  TMP_DIR=$(mktemp -d)
-  trap 'rm -rf "$TMP_DIR"' EXIT
-  
-  info "Downloading extension..."
-  ZIP_URL="${BASE_URL}/download-extension/${UUID}.shell-extension.zip?version_tag=${VERSION}"
-  if ! curl -fsSL "$ZIP_URL" -o "$TMP_DIR/extension.zip"; then
-    error "Failed to download extension"
-    return 1
-  fi
-
-  if gnome-extensions install --force "$TMP_DIR/extension.zip"; then
-    success "Installed ${NAME}"
-    
-    if gnome-extensions enable "$UUID"; then
-      success "Enabled ${NAME}"
-    else
-      warning "Could not enable ${NAME} - may require GNOME Shell restart"
-    fi
-  else
-    error "Failed to install ${NAME}"
-    return 1
-  fi
-}
-
-# === Installation Summary ===
-echo -e "\n${CYAN}=== GNOME Extensions Installer ===${NC}"
-echo -e "Extensions to install: ${#EXTENSIONS[@]}"
-echo -e "GNOME Version: ${GNOME_VERSION}\n"
-
-# Loop through all extensions
 INSTALLED=0
 SKIPPED=0
-FAILED=0
 
-for EXT in "${!EXTENSIONS[@]}"; do
-  if install_extension "$EXT"; then
-    ((INSTALLED++))
+for EXT in "${EXTENSIONS[@]}"; do
+  if ! "$GEXT_BIN" list | grep -q "$EXT"; then
+    info "Installing extension: $EXT"
+    if "$GEXT_BIN" install "$EXT"; then
+      success "Installed: $EXT"
+      ((INSTALLED++))
+    else
+      error "Failed to install: $EXT"
+    fi
   else
-    ((FAILED++))
+    warning "Extension already installed: $EXT"
+    ((SKIPPED++))
   fi
-  echo
 done
 
-# === Final Report ===
-echo -e "${CYAN}=== Installation Summary ===${NC}"
-echo -e "${GREEN}✓ Successfully installed: ${INSTALLED}${NC}"
-echo -e "${YELLOW}⚠ Skipped: ${SKIPPED}${NC}"
-echo -e "${RED}✖ Failed: ${FAILED}${NC}"
-
-if [ $FAILED -gt 0 ]; then
-  warning "Some extensions failed to install. This is often due to:"
-  echo "- Incompatible GNOME Shell version"
-  echo "- Network issues"
-  echo "- Missing dependencies"
-  echo "Check the output above for specific errors."
+# === Load GNOME dconf Settings ===
+DCONF_FILE="$SCRIPT_DIR/gnome-settings.dconf"
+if [[ -f "$DCONF_FILE" ]]; then
+  info "Applying GNOME Shell extension settings from: $DCONF_FILE"
+  if dconf load /org/gnome/shell/extensions/ < "$DCONF_FILE"; then
+    success "Settings applied"
+  else
+    error "Failed to apply dconf settings"
+  fi
+else
+  warning "dconf settings file not found: $DCONF_FILE"
 fi
 
-info "You may need to restart GNOME Shell (Alt+F2 then 'r') to see all changes."
+# === Final Summary ===
+echo -e "\n${CYAN}=== Summary ===${NC}"
+echo -e "${GREEN}✓ Extensions installed: ${INSTALLED}${NC}"
+echo -e "${YELLOW}⚠ Extensions skipped (already installed): ${SKIPPED}${NC}"
