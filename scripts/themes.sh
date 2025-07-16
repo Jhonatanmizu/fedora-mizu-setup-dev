@@ -16,7 +16,7 @@ warning() { echo -e "${YELLOW}⚠ $1${NC}"; }
 error() { echo -e "${RED}✖ $1${NC}" >&2; }
 
 # === Main Script ===
-echo -e "${CYAN}🎨 Installing Tokyo Night GTK theme and Tela icon theme...${NC}"
+echo -e "${CYAN}🎨 Installing Dracula GTK theme and Tela icon theme...${NC}"
 
 # === Check Requirements ===
 REQUIRED_CMDS=(git gsettings dnf unzip)
@@ -45,19 +45,19 @@ else
   success "User Themes extension already installed"
 fi
 
-# === 1. Install Tokyo Night GTK Theme ===
-TOKYONIGHT_DIR="$HOME/.themes"
-TEMP_TOKYO="/tmp/tokyo-night-gtk-$(date +%s)"
-mkdir -p "$TOKYONIGHT_DIR"
+# === 1. Install Dracula GTK Theme ===
+DRACULA_DIR="$HOME/.themes"
+TEMP_DRACULA="/tmp/dracula-gtk-$(date +%s)"
+mkdir -p "$DRACULA_DIR"
 
-info "Cloning Tokyo Night GTK theme into $TEMP_TOKYO..."
-if ! git clone --depth 1 https://github.com/Fausto-Korpsvart/Tokyo-Night-GTK-Theme "$TEMP_TOKYO"; then
-  error "Failed to clone Tokyo Night GTK repository"
+info "Cloning Dracula GTK theme into $TEMP_DRACULA..."
+if ! git clone --depth 1 https://github.com/dracula/gtk "$TEMP_DRACULA"; then
+  error "Failed to clone Dracula GTK repository"
   exit 1
 fi
 
-info "Installing Tokyo Night GTK theme..."
-mv "$TEMP_TOKYO/themes/Tokyonight-Dark-BL" "$TOKYONIGHT_DIR/Tokyonight-Dark-BL"
+info "Installing Dracula GTK theme..."
+mv "$TEMP_DRACULA" "$DRACULA_DIR/Dracula"
 
 # === 2. Install Tela Icon Theme ===
 TEMP_TELA="/tmp/tela-icons-$(date +%s)"
@@ -90,12 +90,12 @@ fi
 info "Applying theme settings..."
 
 apply_theme() {
-  gsettings set org.gnome.desktop.interface gtk-theme "Tokyonight-Dark-BL"
-  gsettings set org.gnome.desktop.wm.preferences theme "Tokyonight-Dark-BL"
+  gsettings set org.gnome.desktop.interface gtk-theme "Dracula"
+  gsettings set org.gnome.desktop.wm.preferences theme "Dracula"
   gsettings set org.gnome.desktop.interface icon-theme "Tela-dark"
 
   if gsettings list-schemas | grep -q "org.gnome.shell.extensions.user-theme"; then
-    gsettings set org.gnome.shell.extensions.user-theme name "Tokyonight-Dark-BL"
+    gsettings set org.gnome.shell.extensions.user-theme name "Dracula"
   else
     warning "GNOME Shell user-theme schema not found. Shell theme not applied."
   fi
@@ -112,7 +112,7 @@ verify_theme() {
   local current_gtk=$(gsettings get org.gnome.desktop.interface gtk-theme)
   local current_icons=$(gsettings get org.gnome.desktop.interface icon-theme)
 
-  if [[ "$current_gtk" != "'Tokyonight-Dark-BL'" ]]; then
+  if [[ "$current_gtk" != "'Dracula'" ]]; then
     warning "GTK theme not applied correctly (current: $current_gtk)"
   fi
 
@@ -123,7 +123,7 @@ verify_theme() {
 
 verify_theme
 
-success "✅ Tokyo Night GTK theme and Tela icons installed and applied!"
+success "✅ Dracula GTK theme and Tela icons installed and applied!"
 info "ℹ️ You may need to:"
 echo "  - Restart GNOME Shell (Alt+F2, then type 'r' and press Enter)"
 echo "  - Or log out and log back in to see full shell theme effect"
