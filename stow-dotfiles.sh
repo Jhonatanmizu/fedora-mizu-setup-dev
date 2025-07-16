@@ -39,21 +39,24 @@ fi
 # === Set dotfiles directory ===
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 
+# === Ensure parent directory exists ===
+mkdir -p "$(dirname "$DOTFILES_DIR")"
+
 # === Clone if not exists ===
 if [ ! -d "$DOTFILES_DIR" ]; then
-  info "Cloning dotfiles repository..."
-  if ! git clone --quiet https://github.com/jhonatanmizu/dotfiles.git "$DOTFILES_DIR"; then
+  info "Cloning dotfiles repository into $DOTFILES_DIR..."
+  if git clone https://github.com/jhonatanmizu/dotfiles.git "$DOTFILES_DIR"; then
+    success "Repository cloned successfully"
+  else
     error "Failed to clone dotfiles repository"
     exit 1
   fi
-  success "Repository cloned successfully"
+else
+  info "Dotfiles directory already exists at $DOTFILES_DIR"
 fi
 
 # === Change to dotfiles directory ===
-if ! cd "$DOTFILES_DIR"; then
-  error "Failed to access $DOTFILES_DIR"
-  exit 1
-fi
+cd "$DOTFILES_DIR" || { error "Failed to access $DOTFILES_DIR"; exit 1; }
 
 # === Update repository if it exists ===
 if [ -d ".git" ]; then
