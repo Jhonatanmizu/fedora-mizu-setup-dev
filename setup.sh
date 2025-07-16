@@ -87,7 +87,7 @@ BASIC_PKGS=(
   wget
   gcc-c++
   make
-  bashtop
+#  bashtop
   fastfetch
   zsh
   zsh-syntax-highlighting
@@ -220,10 +220,10 @@ if ! is_package_installed docker-ce; then
     error "Failed to install dnf-plugins-core"
     exit 1
   }
-  
-  sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo || {
-    error "Failed to add Docker repository"
-    exit 1
+
+  sudo dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo || {
+   error "Failed to add Docker repository"
+   exit 1
   }
   
   DOCKER_PKGS=(
@@ -266,51 +266,9 @@ if ! is_package_installed code; then
   }
 fi
 
-# === Android Studio Installation ===
-info "8. Installing Android Studio..."
-if [ ! -d "/opt/android-studio" ]; then
-  LATEST_URL=$(curl -fsS "https://developer.android.com/studio#downloads" | grep -o 'https://redirector.gvt1.com/edgedl/android/studio/ide-zips/[^"]*-linux.tar.gz' | head -n 1)
-  
-  if [ -z "$LATEST_URL" ]; then
-    error "Failed to get Android Studio download URL"
-    exit 1
-  fi
-  
-  FILE_NAME=$(basename "$LATEST_URL")
-  info "Downloading Android Studio from $LATEST_URL"
-  
-  if ! wget --show-progress -q "$LATEST_URL" -O "$FILE_NAME"; then
-    error "Failed to download Android Studio"
-    exit 1
-  fi
-  
-  sudo mkdir -p /opt/android-studio
-  sudo tar -xzf "$FILE_NAME" -C /opt || {
-    error "Failed to extract Android Studio"
-    exit 1
-  }
-  
-  rm "$FILE_NAME"
-  
-  # Create desktop entry
-  if [ -f "/opt/android-studio/bin/studio.sh" ]; then
-    sudo tee /usr/share/applications/android-studio.desktop > /dev/null <<EOF
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Android Studio
-Exec=/opt/android-studio/bin/studio.sh
-Icon=/opt/android-studio/bin/studio.png
-Categories=Development;IDE;
-Terminal=false
-StartupNotify=true
-StartupWMClass=jetbrains-android-studio
-EOF
-  fi
-fi
 
 # === Alacritty Installation ===
-info "9. Installing Alacritty Terminal..."
+info "8. Installing Alacritty Terminal..."
 if ! is_package_installed alacritty; then
   sudo dnf copr enable -y atim/alacritty || {
     error "Failed to enable Alacritty COPR repository"
@@ -323,13 +281,13 @@ if ! is_package_installed alacritty; then
 fi
 
 # === Create Default Folders ===
-info "10. Creating default folders..."
+info "9. Creating default folders..."
 mkdir -p ~/Developer ~/Wallpapers || {
   warning "Failed to create default folders"
 }
 
 # === Dotfiles Setup ===
-info "11. Loading dotfiles..."
+info "10. Loading dotfiles..."
 if ! is_package_installed stow; then
   sudo dnf install -y stow || {
     error "Failed to install stow"
@@ -347,7 +305,7 @@ else
 fi
 
 # === Ulauncher Installation ===
-info "12. Installing Ulauncher..."
+info "11. Installing Ulauncher..."
 if ! is_package_installed ulauncher; then
   sudo dnf install -y ulauncher || {
     error "Failed to install Ulauncher"
@@ -363,7 +321,7 @@ if [ -f "/usr/share/applications/ulauncher.desktop" ]; then
 fi
 
 # === Starship Prompt ===
-info "13. Installing Starship shell prompt..."
+info "12. Installing Starship shell prompt..."
 if ! command -v starship &> /dev/null; then
   curl -fsS https://starship.rs/install.sh | sh -s -- -y || {
     error "Failed to install Starship"
