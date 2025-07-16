@@ -16,80 +16,73 @@ success() { echo -e "${GREEN}✓ $1${NC}"; }
 warning() { echo -e "${YELLOW}⚠ $1${NC}"; }
 error() { echo -e "${RED}✖ $1${NC}" >&2; }
 
-# === Main Script ===
-echo -e "${CYAN}🔤 Installing Nerd Fonts using getnf...${NC}"
+# === Font Variables ===
+FONT_DIR="${HOME}/.local/share/fonts"
+TMP_DIR="$(mktemp -d)"
+NERD_FONT_REPO="https://github.com/ryanoasis/nerd-fonts/releases/latest/download"
+FONTS=("FiraCode" "Meslo")
 
-# === 1. Install getnf if not present ===
-install_getnf() {
-  if ! command -v getnf &> /dev/null; then
-    info "Downloading getnf CLI..."
-    if ! curl -fsSL https://raw.githubusercontent.com/ronniedroid/getnf/main/install.sh | bash; then
-      error "Failed to install getnf"
-      exit 1
-    fi
-    
-    # Add to PATH for current session
-    export PATH="$HOME/.local/bin:$PATH"
-    
-    if ! command -v getnf &> /dev/null; then
-      warning "getnf installed but not in PATH"
-      info "Please run:"
-      echo "  source ~/.bashrc"
-      echo "Or add to your shell config:"
-      echo "  echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc"
-      exit 1
-    fi
-  fi
-}
-
-# === 2. Install fonts ===
+# === Download and Install Fonts ===
 install_fonts() {
-  local fonts=("Meslo" "FiraCode")
-  info "Installing fonts: ${fonts[*]}..."
-  
-  if ! getnf "${fonts[@]}"; then
-    error "Font installation failed"
-    return 1
-  fi
+  mkdir -p "${FONT_DIR}"
+  cd "$TMP_DIR"
+
+  for font in "${FONTS[@]}"; do
+    info "Downloading ${font} Nerd Font..."
+    archive="${font}.zip"
+    url="${NERD_FONT_REPO}/${archive}"
+
+    if curl -fsSLO "$url"; then
+      info "Extracting ${archive}..."
+      unzip -q "$archive" -d "${FONT_DIR}"
+      success "${font} installed to ${FONT_DIR}"
+    else
+      warning "Failed to download ${font} from ${url}"
+    fi
+  done
 }
 
-# === 3. Verify installation ===
+# === Verify Fonts Installed ===
 verify_fonts() {
-  local font_dir="${HOME}/.local/share/fonts"
   local fonts_installed=0
-  
   info "Verifying font installation..."
-  
-  for font in "Meslo" "FiraCode"; do
-    if find "$font_dir" -iname "*${font}*" -print -quit | grep -q .; then
+
+  for font in "${FONTS[@]}"; do
+    if find "$FONT_DIR" -iname "*${font}*" -print -quit | grep -q .; then
       success "Found ${font} font files"
       ((fonts_installed++))
     else
       warning "Could not find ${font} font files"
     fi
   done
-  
+
   if [ "$fonts_installed" -eq 0 ]; then
     error "No fonts were installed"
     return 1
   fi
 }
 
-# === 4. Refresh font cache ===
+# === Refresh Font Cache ===
 refresh_font_cache() {
   info "Refreshing font cache..."
-  if ! fc-cache -fv > /dev/null; then
-    warning "Font cache refresh failed (continuing anyway)"
-  else
+  if fc-cache -fv > /dev/null; then
     success "Font cache updated"
+  else
+    warning "Font cache refresh failed"
   fi
 }
 
+# === Clean Up Temp Files ===
+cleanup() {
+  rm -rf "$TMP_DIR"
+}
+
 # === Main Execution ===
-install_getnf
+echo -e "${CYAN}🔤 Installing Nerd Fonts from official GitHub releases...${NC}"
 install_fonts
 refresh_font_cache
 verify_fonts
+cleanup
 
 # === Final Report ===
 echo -e "\n${CYAN}=== Font Installation Summary ===${NC}"
@@ -100,6 +93,6 @@ if verify_fonts; then
   echo "  - Configure your terminal emulator to use the installed fonts"
 else
   warning "Some fonts may not have installed correctly"
-  info "Try running manually:"
-  echo "  getnf Meslo FiraCode"
+  info "Try downloading and installing them manually from:"
+  echo "  https://github.com/ryanoasis/nerd-fonts/releases"
 fi
