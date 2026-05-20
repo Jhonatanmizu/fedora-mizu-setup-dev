@@ -2,25 +2,30 @@
 
 set -euo pipefail
 
-# === Color Variables ===
-GREEN="\033[1;32m"
-CYAN="\033[1;36m"
-RED="\033[1;31m"
-YELLOW="\033[1;33m"
-BLUE="\033[1;34m"
-NC="\033[0m"
-
-# === Utility Functions ===
-info() { echo -e "${BLUE}ℹ $1${NC}"; }
-success() { echo -e "${GREEN}✓ $1${NC}"; }
-warning() { echo -e "${YELLOW}⚠ $1${NC}"; }
-error() { echo -e "${RED}✖ $1${NC}" >&2; }
-
 # === Font Variables ===
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../utils.sh"
 FONT_DIR="${HOME}/.local/share/fonts"
 TMP_DIR="$(mktemp -d)"
 NERD_FONT_REPO="https://github.com/ryanoasis/nerd-fonts/releases/latest/download"
 FONTS=("FiraCode" "Meslo")
+
+# === Check Requirements ===
+REQUIRED_CMDS=(curl unzip fc-cache find)
+missing_cmds=()
+
+for cmd in "${REQUIRED_CMDS[@]}"; do
+  if ! command -v "$cmd" &>/dev/null; then
+    missing_cmds+=("$cmd")
+  fi
+done
+
+if [ ${#missing_cmds[@]} -gt 0 ]; then
+  error "Missing required commands: ${missing_cmds[*]}"
+  info "Install them with:"
+  echo "  sudo dnf install -y ${missing_cmds[*]}"
+  exit 1
+fi
 
 # === Download and Install Fonts ===
 install_fonts() {
@@ -81,7 +86,6 @@ cleanup() {
 echo -e "${CYAN}🔤 Installing Nerd Fonts from official GitHub releases...${NC}"
 install_fonts
 refresh_font_cache
-verify_fonts
 cleanup
 
 # === Final Report ===

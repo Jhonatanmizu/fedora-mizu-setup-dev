@@ -2,21 +2,9 @@
 
 set -euo pipefail
 
-# === Color Variables ===
-GREEN="\033[1;32m"
-RED="\033[1;31m"
-CYAN="\033[1;36m"
-YELLOW="\033[1;33m"
-BLUE="\033[1;34m"
-NC="\033[0m"
-
-# === Utility Functions ===
-info() { echo -e "${BLUE}ℹ $1${NC}"; }
-success() { echo -e "${GREEN}✓ $1${NC}"; }
-warning() { echo -e "${YELLOW}⚠ $1${NC}"; }
-error() { echo -e "${RED}✖ $1${NC}" >&2; }
-
 # === Start ===
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../utils.sh"
 echo -e "\n${CYAN}=== GNOME Workspace & Keybinding Configuration ===${NC}"
 
 # === Configure Static Workspaces ===

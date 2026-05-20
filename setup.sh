@@ -2,66 +2,15 @@
 
 set -eo pipefail
 
-# === Colors ===
-GREEN='\033[1;32m'
-RED='\033[1;31m'
-CYAN='\033[1;36m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-# === Utility Functions ===
-info() {
-  echo -e "${CYAN}ℹ $1${NC}"
-}
-
-success() {
-  echo -e "${GREEN}✓ $1${NC}"
-}
-
-warning() {
-  echo -e "${YELLOW}⚠ $1${NC}"
-}
-
-error() {
-  echo -e "${RED}✖ $1${NC}" >&2
-}
-
-check_command() {
-  if ! command -v "$1" &> /dev/null; then
-    error "Missing command: $1. Please install it before proceeding."
-    return 1
-  fi
-}
-
-is_package_installed() {
-  rpm -q "$1" &> /dev/null
-}
-
-install_packages() {
-  local packages=("$@")
-  local to_install=()
-  
-  for pkg in "${packages[@]}"; do
-    if ! is_package_installed "$pkg"; then
-      to_install+=("$pkg")
-    else
-      info "$pkg is already installed, skipping..."
-    fi
-  done
-  
-  if [ ${#to_install[@]} -gt 0 ]; then
-    sudo dnf install -y "${to_install[@]}" || {
-      error "Failed to install packages: ${to_install[*]}"
-      return 1
-    }
-  fi
-}
+# === Source shared utilities ===
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils.sh"
 
 # === Main Script ===
 echo -e "${CYAN}🚀 Fedora Mizu Setup Started${NC}"
 
 # === Check Required Commands ===
-REQUIRED_CMDS=(sudo git curl wget zsh gsettings stow)
+REQUIRED_CMDS=(sudo git curl wget zsh gsettings)
 for cmd in "${REQUIRED_CMDS[@]}"; do
   check_command "$cmd" || exit 1
 done
@@ -331,7 +280,7 @@ fi
 
 # === GNOME Extensions ===
 if [ -f "$(dirname "$0")/scripts/shell-extensions.sh" ]; then
-  info "14. Installing GNOME Extensions..."
+  info "13. Installing GNOME Extensions..."
   bash "$(dirname "$0")/scripts/shell-extensions.sh" || {
     warning "Failed to install GNOME extensions"
   }
@@ -341,7 +290,7 @@ fi
 
 # === GNOME Shortcuts ===
 if [ -f "$(dirname "$0")/scripts/gnome-shortcuts.sh" ]; then
-  info "15. Setting GNOME Shortcuts..."
+  info "14. Setting GNOME Shortcuts..."
   bash "$(dirname "$0")/scripts/gnome-shortcuts.sh" || {
     warning "Failed to set GNOME shortcuts"
   }
@@ -351,7 +300,7 @@ fi
 
 # === Themes ===
 if [ -f "$(dirname "$0")/scripts/themes.sh" ]; then
-  info "16. Installing Themes..."
+  info "15. Installing Themes..."
   bash "$(dirname "$0")/scripts/themes.sh" || {
     warning "Failed to install themes"
   }
@@ -361,7 +310,7 @@ fi
 
 # === Fonts ===
 if [ -f "$(dirname "$0")/scripts/fonts.sh" ]; then
-  info "17. Installing Fonts..."
+  info "16. Installing Fonts..."
   bash "$(dirname "$0")/scripts/fonts.sh" || {
     warning "Failed to install fonts"
   }
@@ -373,4 +322,4 @@ fi
 success "✅ Fedora Mizu setup complete!"
 info "ℹ️ Please restart your terminal or run 'exec zsh' to activate your new environment."
 info "ℹ️ For Docker permissions, you may need to log out and back in."
-info "ℹ️ For Android Studio, you may need to run: /opt/android-studio/bin/studio.sh"
+

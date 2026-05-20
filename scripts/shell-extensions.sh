@@ -2,20 +2,6 @@
 
 set -euo pipefail
 
-# === Color Variables ===
-GREEN="\033[1;32m"
-RED="\033[1;31m"
-CYAN="\033[1;36m"
-YELLOW="\033[1;33m"
-BLUE="\033[1;34m"
-NC="\033[0m"
-
-# === Utility Functions ===
-info() { echo -e "${BLUE}ℹ $1${NC}"; }
-success() { echo -e "${GREEN}✓ $1${NC}"; }
-warning() { echo -e "${YELLOW}⚠ $1${NC}"; }
-error() { echo -e "${RED}✖ $1${NC}" >&2; }
-
 # === Script Setup ===
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../utils.sh"
@@ -67,18 +53,8 @@ for EXT in "${EXTENSIONS[@]}"; do
   fi
 done
 
-# === Load GNOME dconf Settings ===
-DCONF_FILE="$SCRIPT_DIR/gnome-settings.dconf"
-if [[ -f "$DCONF_FILE" ]]; then
-  info "Applying GNOME Shell extension settings from: $DCONF_FILE"
-  if dconf load /org/gnome/shell/extensions/ < "$DCONF_FILE"; then
-    success "Settings applied"
-  else
-    error "Failed to apply dconf settings"
-  fi
-else
-  warning "dconf settings file not found: $DCONF_FILE"
-fi
+# === GNOME Shell Extension Settings ===
+info "GNOME extension settings can be configured manually via GNOME Tweaks or Extensions app."
 
 # === Final Summary ===
 echo -e "\n${CYAN}=== Summary ===${NC}"

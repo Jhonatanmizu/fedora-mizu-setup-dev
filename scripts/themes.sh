@@ -2,24 +2,13 @@
 
 set -euo pipefail
 
-# === Color Variables ===
-GREEN="\033[1;32m"
-CYAN="\033[1;36m"
-RED="\033[1;31m"
-YELLOW="\033[1;33m"
-NC="\033[0m"
-
-# === Utility Functions ===
-info() { echo -e "${CYAN}ℹ $1${NC}"; }
-success() { echo -e "${GREEN}✓ $1${NC}"; }
-warning() { echo -e "${YELLOW}⚠ $1${NC}"; }
-error() { echo -e "${RED}✖ $1${NC}" >&2; }
-
 # === Main Script ===
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../utils.sh"
 echo -e "${CYAN}🎨 Installing Dracula GTK theme and Tela icon theme...${NC}"
 
 # === Check Requirements ===
-REQUIRED_CMDS=(git gsettings dnf unzip)
+REQUIRED_CMDS=(git gsettings dnf unzip gnome-extensions)
 missing_cmds=()
 
 for cmd in "${REQUIRED_CMDS[@]}"; do
@@ -47,7 +36,7 @@ fi
 
 # === 1. Install Dracula GTK Theme ===
 DRACULA_DIR="$HOME/.themes"
-TEMP_DRACULA="/tmp/dracula-gtk-$(date +%s)"
+TEMP_DRACULA="$(mktemp -d)"
 mkdir -p "$DRACULA_DIR"
 
 info "Cloning Dracula GTK theme into $TEMP_DRACULA..."
@@ -57,10 +46,11 @@ if ! git clone --depth 1 https://github.com/dracula/gtk "$TEMP_DRACULA"; then
 fi
 
 info "Installing Dracula GTK theme..."
+rm -rf "$DRACULA_DIR/Dracula"
 mv "$TEMP_DRACULA" "$DRACULA_DIR/Dracula"
 
 # === 2. Install Tela Icon Theme ===
-TEMP_TELA="/tmp/tela-icons-$(date +%s)"
+TEMP_TELA="$(mktemp -d)"
 info "Downloading Tela icon theme to $TEMP_TELA..."
 
 if ! git clone --quiet https://github.com/vinceliuice/Tela-icon-theme.git "$TEMP_TELA"; then
